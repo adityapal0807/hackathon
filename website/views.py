@@ -2,6 +2,8 @@ from rest_framework import viewsets
 import json
 from django.http import JsonResponse
 from django.http import HttpResponse
+import numpy as np 
+import joblib  
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -29,11 +31,23 @@ def location(request):
 
 @csrf_exempt
 def cropprediction(request):
+   
    if request.method == "POST":
       data = request.POST.dict()
+      N = data['N']
+      P = data['P']
+      K = data['K']
+      humidity = data['humidity']
+      temp = data['temp']
+      rainfall = data['rainfall']
+      ph = data['ph']
+
+      user_inputs = np.array[N,P,K,humidity,temp,rainfall,ph].reshape(1,-1)
+      model = joblib.load('../notebooks/RFR_Model.sav')
+      result = model.predict(user_inputs)
       print(data)
       
 
-      return JsonResponse({'success':1,'code':0})
+      return JsonResponse({'success':str(result[0]),'code':0})
    else:
       return JsonResponse({'success':1})
